@@ -1,0 +1,6 @@
+{
+  "name": "SURGE",
+  "description": "A high-stakes, mission-control command center for tactical academic scheduling and cognitive block diagnosis.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

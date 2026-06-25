@@ -1,0 +1,97 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  
+  --color-surface-dim: #050505;
+  --color-surface-container: #18181b;
+  --color-surface-container-high: #27272a;
+  --color-surface-container-highest: #3f3f46;
+  --color-surface-container-low: #0c0c0e;
+  --color-surface-container-lowest: #050505;
+  --color-outline-variant: #27272a;
+}
+
+body {
+  background-color: #050505;
+  color: #F0F0F0;
+  font-family: var(--font-sans);
+}
+
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  vertical-align: middle;
+}
+
+.technical-grid-bg {
+  background-size: 40px 40px;
+  background-image: linear-gradient(to right, rgba(99, 102, 241, 0.03) 1px, transparent 1px), linear-gradient(to bottom, rgba(99, 102, 241, 0.03) 1px, transparent 1px);
+}
+
+.technical-grid-dense {
+  background-image: linear-gradient(rgba(99, 102, 241, 0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(99, 102, 241, 0.04) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #050505;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #27272a;
+  border-radius: 9999px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #4f46e5;
+}
+
+@keyframes pulse-border {
+  0%, 100% {
+    border-color: rgba(239, 68, 68, 0.5);
+    box-shadow: inset 0 0 15px rgba(239, 68, 68, 0.2), 0 0 15px rgba(239, 68, 68, 0.1);
+  }
+  50% {
+    border-color: rgba(239, 68, 68, 0.9);
+    box-shadow: inset 0 0 30px rgba(239, 68, 68, 0.1), 0 0 25px rgba(239, 68, 68, 0.3);
+  }
+}
+
+.surge-pulse-border {
+  animation: pulse-border 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes scan {
+  from { top: 0%; }
+  to { top: 100%; }
+}
+
+.scanline::after {
+  content: " ";
+  display: block;
+  width: 100%;
+  height: 2px;
+  background: rgba(99, 102, 241, 0.08);
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  animation: scan 6s linear infinite;
+}
+
+.scanline-surge::after {
+  content: " ";
+  display: block;
+  width: 100%;
+  height: 2px;
+  background: rgba(239, 68, 68, 0.15);
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  animation: scan 4s linear infinite;
+}
+
