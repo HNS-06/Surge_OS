@@ -72,4 +72,4 @@ export interface User {
   createdAt: string;
 }
 
-export type TabKey = 'onboarding' | 'overview' | 'schedule' | 'surge' | 'debrief';
+export type TabKey = 'onboarding' | 'overview' | 'schedule' | 'surge' | 'debrief' | 'auth';

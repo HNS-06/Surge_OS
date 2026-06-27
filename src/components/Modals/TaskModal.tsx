@@ -7,6 +7,7 @@ export default function TaskModal() {
     isTaskModalOpen,
     setIsTaskModalOpen,
     subjects,
+    tasks,
     newTaskName,
     setNewTaskName,
     newTaskSubject,
@@ -26,23 +27,59 @@ export default function TaskModal() {
     showAddSubjectInline,
     setShowAddSubjectInline,
     saveState,
-    handleAddNewTask
+    handleAddNewTask,
+    token,
+    showToast,
   } = useApp();
 
   if (!isTaskModalOpen) return null;
 
+  const handleSaveInlineSubject = async () => {
+    if (!newSubjectInline.trim()) return;
+    const code = newSubjectInline.toUpperCase();
+
+    if (token) {
+      try {
+        const response = await fetch('/api/data/subjects', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify({ name: code })
+        });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const updatedSubjects = await response.json();
+        if (Array.isArray(updatedSubjects)) {
+          // Pass current tasks to avoid wiping them
+          saveState(updatedSubjects, tasks);
+        }
+      } catch (e) {
+        console.error("Failed to add subject via API", e);
+      }
+    } else {
+      if (!subjects.includes(code)) {
+        // Pass current tasks to avoid wiping them
+        saveState([...subjects, code], tasks);
+      }
+    }
+
+    setNewTaskSubject(code);
+    setNewSubjectInline("");
+    setShowAddSubjectInline(false);
+    showToast(`Subject "${code}" added`, "success");
+  };
+
   return (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
       <div className="w-full max-w-[500px] bg-zinc-900 border border-zinc-800 shadow-2xl relative flex flex-col rounded-[2rem] overflow-hidden">
-        
+
         <div className="flex items-center justify-between px-6 py-5 border-b border-zinc-800">
           <div className="flex items-center gap-3 select-none">
             <span className="w-2.5 h-2.5 bg-indigo-500 rounded-full animate-pulse"></span>
             <h2 className="font-sans text-xs font-bold text-white tracking-widest uppercase">ADD NEW TASK</h2>
           </div>
-          <button 
+          <button
             onClick={() => setIsTaskModalOpen(false)}
-            className="text-zinc-500 hover:text-white transition-colors"
+            className="text-zinc-500 hover:text-white transition-colors cursor-pointer"
+            title="Close modal"
           >
             <span className="material-symbols-outlined text-xl">close</span>
           </button>
@@ -95,18 +132,8 @@ export default function TaskModal() {
                 />
                 <button
                   type="button"
-                  onClick={() => {
-                    if (newSubjectInline.trim()) {
-                      const code = newSubjectInline.toUpperCase();
-                      if (!subjects.includes(code)) {
-                        saveState([...subjects, code], []);
-                        setNewTaskSubject(code);
-                      }
-                    }
-                    setNewSubjectInline("");
-                    setShowAddSubjectInline(false);
-                  }}
-                  className="bg-indigo-600 text-white font-sans text-[10px] px-3 py-1.5 font-bold rounded-xl"
+                  onClick={handleSaveInlineSubject}
+                  className="bg-indigo-600 text-white font-sans text-[10px] px-3 py-1.5 font-bold rounded-xl cursor-pointer hover:bg-indigo-500 transition-colors"
                 >
                   SAVE
                 </button>
@@ -122,9 +149,9 @@ export default function TaskModal() {
                   key={t}
                   type="button"
                   onClick={() => setNewTaskType(t)}
-                  className={`py-3 font-sans text-[9px] font-bold transition-all border-r border-zinc-800/60 last:border-r-0 ${
-                    newTaskType === t 
-                      ? 'bg-amber-500 text-zinc-950' 
+                  className={`py-3 font-sans text-[9px] font-bold transition-all border-r border-zinc-800/60 last:border-r-0 cursor-pointer ${
+                    newTaskType === t
+                      ? 'bg-amber-500 text-zinc-950'
                       : 'text-zinc-400 hover:bg-zinc-900 hover:text-white'
                   }`}
                 >
@@ -163,7 +190,8 @@ export default function TaskModal() {
               <button
                 type="button"
                 onClick={() => setNewTaskEstHours(prev => Math.max(1, prev - 1))}
-                className="px-4 py-3 text-zinc-400 hover:text-white transition-colors border-r border-zinc-800"
+                className="px-4 py-3 text-zinc-400 hover:text-white transition-colors border-r border-zinc-800 cursor-pointer"
+                title="Decrease hours"
               >
                 <span className="material-symbols-outlined text-sm font-bold">remove</span>
               </button>
@@ -176,7 +204,8 @@ export default function TaskModal() {
               <button
                 type="button"
                 onClick={() => setNewTaskEstHours(prev => Math.min(99, prev + 1))}
-                className="px-4 py-3 text-zinc-400 hover:text-white transition-colors border-l border-zinc-800"
+                className="px-4 py-3 text-zinc-400 hover:text-white transition-colors border-l border-zinc-800 cursor-pointer"
+                title="Increase hours"
               >
                 <span className="material-symbols-outlined text-sm font-bold">add</span>
               </button>
@@ -191,9 +220,9 @@ export default function TaskModal() {
                   key={b}
                   type="button"
                   onClick={() => setNewTaskBlock(prev => prev === b ? null : b)}
-                  className={`py-2 font-sans text-[10px] border tracking-wider font-semibold transition-all rounded-xl ${
-                    newTaskBlock === b 
-                      ? 'border-amber-500 text-amber-500 bg-amber-500/5 shadow-lg' 
+                  className={`py-2 font-sans text-[10px] border tracking-wider font-semibold transition-all rounded-xl cursor-pointer ${
+                    newTaskBlock === b
+                      ? 'border-amber-500 text-amber-500 bg-amber-500/5 shadow-lg'
                       : 'border-zinc-800 text-zinc-400 hover:border-zinc-700 hover:text-white bg-zinc-950/20'
                   }`}
                 >
@@ -206,7 +235,7 @@ export default function TaskModal() {
           <div className="pt-4 space-y-4">
             <button
               type="submit"
-              className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-sans text-xs font-bold py-4 tracking-wider shadow-lg transition-all active:scale-[0.98] flex items-center justify-center gap-2 rounded-xl"
+              className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-sans text-xs font-bold py-4 tracking-wider shadow-lg transition-all active:scale-[0.98] flex items-center justify-center gap-2 rounded-xl cursor-pointer"
             >
               <span className="material-symbols-outlined text-sm">radar</span>
               ADD TO RADAR
@@ -215,7 +244,7 @@ export default function TaskModal() {
               <button
                 type="button"
                 onClick={() => setIsTaskModalOpen(false)}
-                className="font-sans text-[10px] text-zinc-500 hover:text-zinc-300 tracking-wider uppercase underline underline-offset-4 decoration-zinc-800"
+                className="font-sans text-[10px] text-zinc-500 hover:text-zinc-300 tracking-wider uppercase underline underline-offset-4 decoration-zinc-800 cursor-pointer"
               >
                 Cancel Mission
               </button>

@@ -69,7 +69,13 @@ async function startServer() {
 
       const resultText = response.text;
       if (!resultText) throw new Error("Empty response from Gemini API");
-      res.json(JSON.parse(resultText));
+      let parsed: any;
+      try {
+        parsed = JSON.parse(resultText);
+      } catch {
+        throw new Error("Invalid JSON from Gemini API");
+      }
+      res.json(parsed);
     } catch (err: any) {
       console.error("Diagnosis error:", err);
       res.json(getDeterministicFallback(req.body.feelingId || "1", req.body.taskName || "current task"));
@@ -103,7 +109,13 @@ async function startServer() {
 
       const resultText = response.text;
       if (!resultText) throw new Error("Empty response");
-      res.json(JSON.parse(resultText));
+      let parsed: any;
+      try {
+        parsed = JSON.parse(resultText);
+      } catch {
+        throw new Error("Invalid JSON from Gemini API");
+      }
+      res.json(parsed);
     } catch (err) {
       console.error("Optimization error:", err);
       res.json(getFallbackOptimization(req.body.tasks || []));
@@ -136,7 +148,13 @@ async function startServer() {
 
       const resultText = response.text;
       if (!resultText) throw new Error("Empty response");
-      res.json(JSON.parse(resultText));
+      let parsed: any;
+      try {
+        parsed = JSON.parse(resultText);
+      } catch {
+        throw new Error("Invalid JSON from Gemini API");
+      }
+      res.json(parsed);
     } catch (err) {
       console.error("Suggest slots error:", err);
       res.json(getFallbackSuggestions());
@@ -187,4 +205,7 @@ function getFallbackSuggestions() {
   ]};
 }
 
-startServer();
+startServer().catch(err => {
+  console.error('Fatal startup error:', err);
+  process.exit(1);
+});

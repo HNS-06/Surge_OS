@@ -1,11 +1,75 @@
-import React from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 
 export default function ScheduleView() {
   const { tasks, suggestions, handleAcceptSuggestion, handleRejectSuggestion, handleOptimizeFullWeek } = useApp();
 
+  const weekStart = useMemo(() => {
+    const now = new Date();
+    const day = now.getDay();
+    const diff = day === 0 ? -6 : 1 - day;
+    const monday = new Date(now);
+    monday.setDate(now.getDate() + diff);
+    monday.setHours(0, 0, 0, 0);
+    return monday;
+  }, []);
+
+  const dayNames = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
+
+  const weekDates = useMemo(() => {
+    return dayNames.map((name, i) => {
+      const d = new Date(weekStart);
+      d.setDate(weekStart.getDate() + i);
+      return {
+        name,
+        label: d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }).toUpperCase(),
+        isToday: d.toDateString() === new Date().toDateString(),
+      };
+    });
+  }, [weekStart]);
+
+  // Re-evaluate the current time position every minute so the red marker tracks live
+  const [now, setNow] = useState(() => new Date());
+  useEffect(() => {
+    const id = setInterval(() => setNow(new Date()), 60_000);
+    return () => clearInterval(id);
+  }, []);
+
+  const currentTimePosition = useMemo(() => {
+    const hours = now.getHours();
+    const minutes = now.getMinutes();
+    const totalMinutes = (hours - 6) * 60 + minutes;
+    const totalSlotMinutes = 19 * 60;
+    return Math.max(0, Math.min(100, (totalMinutes / totalSlotMinutes) * 100));
+  }, [now]);
+
+  const currentTimeLabel = useMemo(() => {
+    return `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')} SCAN`;
+  }, [now]);
+
+  const windowLabel = useMemo(() => {
+    const end = new Date(weekStart);
+    end.setDate(weekStart.getDate() + 6);
+    const startStr = weekStart.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }).toUpperCase();
+    const endStr = end.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }).toUpperCase();
+    return `WINDOW: ${startStr} - ${endStr}`;
+  }, [weekStart]);
+
+  const dailyLoadScores = useMemo(() => {
+    const scores = Array(7).fill(0);
+    tasks.forEach(t => {
+      if (t.day !== undefined && t.day >= 0 && t.day < 7) {
+        scores[t.day] += t.durationHours || t.estimatedHours || 0;
+      }
+    });
+    return scores;
+  }, [tasks]);
+
+  const incompleteTasks = tasks.filter(t => !t.completed && t.day !== undefined && t.startHour !== undefined);
+  const incompleteSuggestions = suggestions;
+
   return (
-    <div className="flex-grow grid grid-cols-12 gap-6 p-6 overflow-y-auto custom-scrollbar bg-[#050505]">
+    <div className="absolute inset-0 grid grid-cols-12 gap-6 p-6 overflow-y-auto custom-scrollbar bg-[#050505]">
 
       {/* Main Timeline */}
       <div className="col-span-12 lg:col-span-9 bg-zinc-900 border border-zinc-800/80 rounded-[2rem] p-6 flex flex-col h-full shadow-lg relative">
@@ -13,14 +77,14 @@ export default function ScheduleView() {
         <div className="flex justify-between items-end mb-6">
           <div>
             <h1 className="font-sans text-xl font-bold text-white tracking-tight uppercase">WEEKLY OPS TIMELINE</h1>
-            <p className="font-sans text-xs text-zinc-500 mt-0.5 font-medium">WINDOW: OCT 23 - OCT 29 | STATUS: HIGH DENSITY</p>
+            <p className="font-sans text-xs text-zinc-500 mt-0.5 font-medium">{windowLabel} | STATUS: HIGH DENSITY</p>
           </div>
           <div className="flex gap-2">
-            <button className="bg-zinc-950 border border-zinc-800 text-zinc-400 px-4 py-2 font-sans text-xs font-bold flex items-center gap-1.5 hover:bg-zinc-800 hover:text-white transition-all rounded-xl">
+            <button className="bg-zinc-950 border border-zinc-800 text-zinc-400 px-4 py-2 font-sans text-xs font-bold flex items-center gap-1.5 hover:bg-zinc-800 hover:text-white transition-all rounded-xl cursor-pointer" title="Previous week">
               <span className="material-symbols-outlined text-sm font-bold">chevron_left</span>
               PREV
             </button>
-            <button className="bg-zinc-950 border border-zinc-800 text-zinc-400 px-4 py-2 font-sans text-xs font-bold flex items-center gap-1.5 hover:bg-zinc-800 hover:text-white transition-all rounded-xl">
+            <button className="bg-zinc-950 border border-zinc-800 text-zinc-400 px-4 py-2 font-sans text-xs font-bold flex items-center gap-1.5 hover:bg-zinc-800 hover:text-white transition-all rounded-xl cursor-pointer" title="Next week">
               NEXT
               <span className="material-symbols-outlined text-sm font-bold">chevron_right</span>
             </button>
@@ -35,34 +99,37 @@ export default function ScheduleView() {
                 <div className="p-4 border-r border-zinc-800 bg-zinc-900/40 flex items-center justify-center">
                   <span className="material-symbols-outlined text-zinc-400 text-sm">schedule</span>
                 </div>
-                <div className="p-4 border-r border-zinc-800 bg-zinc-900/10">
-                  <p className="tracking-wider text-zinc-400">MON</p>
-                  <p className="text-[10px] text-zinc-500 font-normal mt-0.5">OCT 23</p>
-                </div>
-                <div className="p-4 border-r border-zinc-800 bg-zinc-900/10">
-                  <p className="tracking-wider text-zinc-400">TUE</p>
-                  <p className="text-[10px] text-zinc-500 font-normal mt-0.5">OCT 24</p>
-                </div>
-                <div className="p-4 border-r border-zinc-800 bg-zinc-900/10">
-                  <p className="tracking-wider text-indigo-400 font-bold">WED</p>
-                  <p className="text-[10px] text-indigo-400 font-semibold mt-0.5">OCT 25</p>
-                </div>
-                <div className="p-4 border-r border-zinc-800 bg-zinc-900/10">
-                  <p className="tracking-wider text-zinc-400">THU</p>
-                  <p className="text-[10px] text-zinc-500 font-normal mt-0.5">OCT 26</p>
-                </div>
-                <div className="p-4 border-r border-zinc-800 bg-zinc-900/10">
-                  <p className="tracking-wider text-zinc-400">FRI</p>
-                  <p className="text-[10px] text-zinc-500 font-normal mt-0.5">OCT 27</p>
-                </div>
-                <div className="p-4 border-r border-zinc-800 bg-zinc-900/10">
-                  <p className="tracking-wider text-zinc-400">SAT</p>
-                  <p className="text-[10px] text-zinc-500 font-normal mt-0.5">OCT 28</p>
-                </div>
-                <div className="p-4 bg-zinc-900/10">
-                  <p className="tracking-wider text-zinc-400">SUN</p>
-                  <p className="text-[10px] text-zinc-500 font-normal mt-0.5">OCT 29</p>
-                </div>
+                {weekDates.map((d, i) => {
+                  const score = dailyLoadScores[i];
+                  let bgClass = "bg-zinc-900/10";
+                  let borderClass = "border-t-2 border-t-transparent";
+                  let isOverload = false;
+
+                  if (score > 0 && score <= 3) {
+                    bgClass = "bg-emerald-500/5";
+                    borderClass = "border-t-2 border-t-emerald-500";
+                  } else if (score > 3 && score <= 6) {
+                    bgClass = "bg-amber-500/10";
+                    borderClass = "border-t-2 border-t-amber-500";
+                  } else if (score > 6) {
+                    bgClass = "bg-red-500/15";
+                    borderClass = "border-t-2 border-t-red-500";
+                    isOverload = true;
+                  }
+
+                  return (
+                    <div
+                      key={i}
+                      className={`p-4 border-r border-zinc-800 ${borderClass} ${bgClass} ${i === 6 ? 'border-r-0' : ''} flex flex-col items-center justify-center`}
+                    >
+                      <p className={`tracking-wider ${d.isToday ? 'text-indigo-400 font-bold' : 'text-zinc-400'}`}>{d.name}</p>
+                      <p className={`text-[10px] mt-0.5 ${d.isToday ? 'text-indigo-400 font-semibold' : 'text-zinc-500 font-normal'}`}>{d.label}</p>
+                      {isOverload && (
+                        <span className="font-mono text-[8px] text-red-500 font-bold mt-1 tracking-wider uppercase">OVERLOAD</span>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </div>
@@ -70,9 +137,9 @@ export default function ScheduleView() {
           <div className="flex-1 overflow-y-auto relative custom-scrollbar technical-grid-bg h-[550px] overflow-x-auto">
             <div className="min-w-[800px] h-full relative">
 
-              <div className="absolute left-0 w-full h-0.5 bg-red-500 z-20 shadow-[0_0_10px_rgba(239,68,68,0.5)]" style={{ top: '240px' }}>
+              <div className="absolute left-0 w-full h-0.5 bg-red-500 z-20 shadow-[0_0_10px_rgba(239,68,68,0.5)]" style={{ top: `${currentTimePosition}%` }}>
                 <div className="absolute -left-1.5 -top-2.5 bg-red-500 text-white px-2 py-0.5 font-mono text-[9px] font-bold rounded-lg">
-                  14:42 SCAN
+                  {currentTimeLabel}
                 </div>
               </div>
 
@@ -95,17 +162,17 @@ export default function ScheduleView() {
                     <div key={idx} className="absolute h-full border-r border-zinc-800/20" style={{ left: `${(idx + 1) * (100 / 7)}%` }}></div>
                   ))}
 
-                  {tasks.filter(t => !t.completed && t.day !== undefined && t.startHour !== undefined).map(task => {
+                  {incompleteTasks.map(task => {
                     const topPx = (task.startHour! - 6) * 64;
                     const heightPx = (task.durationHours || 1.5) * 64;
                     const colWidthPct = 100 / 7;
                     const leftPct = task.day! * colWidthPct;
-                    const isCritical = task.id === "critical_exam" || task.type === "EXAM";
+                    const isCritical = task.type === "EXAM";
 
                     return (
                       <div
                         key={task.id}
-                        className={`absolute p-2.5 border-l-4 z-10 select-none overflow-hidden hover:brightness-110 transition-all rounded-lg ${
+                        className={`absolute p-2.5 border-l-4 z-10 select-none overflow-hidden hover:brightness-110 transition-all rounded-lg cursor-pointer ${
                           isCritical
                             ? 'bg-red-500/10 border-red-500 text-red-400'
                             : 'bg-indigo-600/10 border-indigo-500 text-indigo-400'
@@ -116,6 +183,7 @@ export default function ScheduleView() {
                           left: `${leftPct}%`,
                           width: `${colWidthPct - 0.2}%`
                         }}
+                        title={`${task.name} — ${task.subject}`}
                       >
                         <p className="font-sans text-[10px] font-bold tracking-wider uppercase truncate">
                           {task.name}
@@ -127,7 +195,7 @@ export default function ScheduleView() {
                     );
                   })}
 
-                  {suggestions.map(sug => {
+                  {incompleteSuggestions.map(sug => {
                     const topPx = (sug.startHour - 6) * 64;
                     const heightPx = sug.durationHours * 64;
                     const colWidthPct = 100 / 7;
@@ -144,6 +212,7 @@ export default function ScheduleView() {
                           left: `${leftPct}%`,
                           width: `${colWidthPct - 0.2}%`
                         }}
+                        title={`Accept suggestion: ${sug.title}`}
                       >
                         <div>
                           <p className="font-sans text-[9px] font-bold text-zinc-500 tracking-widest uppercase">
@@ -198,13 +267,14 @@ export default function ScheduleView() {
                   <div className="mt-4 flex gap-2">
                     <button
                       onClick={() => handleAcceptSuggestion(sug)}
-                      className="flex-grow bg-indigo-600 text-white font-sans text-[10px] font-bold py-2 hover:bg-indigo-500 transition-all rounded-xl"
+                      className="flex-grow bg-indigo-600 text-white font-sans text-[10px] font-bold py-2 hover:bg-indigo-500 transition-all rounded-xl cursor-pointer"
                     >
                       ACCEPT SLOT
                     </button>
                     <button
                       onClick={() => handleRejectSuggestion(sug.id)}
-                      className="w-9 border border-zinc-800 hover:bg-zinc-900 hover:text-red-400 transition-colors flex items-center justify-center rounded-xl"
+                      className="w-9 border border-zinc-800 hover:bg-zinc-900 hover:text-red-400 transition-colors flex items-center justify-center rounded-xl cursor-pointer"
+                      title="Reject suggestion"
                     >
                       <span className="material-symbols-outlined text-xs">close</span>
                     </button>
@@ -228,7 +298,7 @@ export default function ScheduleView() {
 
           <button
             onClick={handleOptimizeFullWeek}
-            className="w-full bg-zinc-950 border border-zinc-800 py-3.5 font-sans text-xs font-bold text-zinc-300 tracking-widest flex items-center justify-center gap-2 hover:bg-zinc-800 hover:text-white transition-all rounded-xl hover:scale-[1.01] active:scale-[0.99]"
+            className="w-full bg-zinc-950 border border-zinc-800 py-3.5 font-sans text-xs font-bold text-zinc-300 tracking-widest flex items-center justify-center gap-2 hover:bg-zinc-800 hover:text-white transition-all rounded-xl hover:scale-[1.01] active:scale-[0.99] cursor-pointer"
           >
             <span className="material-symbols-outlined text-base text-indigo-400">rocket_launch</span>
             OPTIMIZE FULL WEEK

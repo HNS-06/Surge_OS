@@ -4,10 +4,26 @@ import { useApp } from '../../context/AppContext';
 export default function DebriefView() {
   const { debriefData, isCopied, handleExportSessionData, handleCopySessionData, setCurrentTab } = useApp();
 
-  if (!debriefData) return null;
+  if (!debriefData) {
+    return (
+      <div className="absolute inset-0 flex items-center justify-center p-6 bg-[#050505]">
+        <div className="text-center max-w-md">
+          <span className="material-symbols-outlined text-zinc-700 text-6xl mb-4 block">analytics</span>
+          <h2 className="font-sans text-lg font-bold text-zinc-400 mb-2 uppercase">NO SESSION DATA</h2>
+          <p className="font-sans text-xs text-zinc-500 mb-6">Complete a SURGE session to view your debrief analytics.</p>
+          <button
+            onClick={() => setCurrentTab("overview")}
+            className="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-3 font-sans text-xs font-bold tracking-wider rounded-xl transition-all cursor-pointer"
+          >
+            BACK TO DASHBOARD
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="flex-grow p-6 overflow-y-auto custom-scrollbar h-full bg-[#050505]">
+    <div className="absolute inset-0 p-6 overflow-y-auto custom-scrollbar bg-[#050505]">
       <div className="max-w-7xl mx-auto bg-zinc-900 border border-zinc-800 rounded-[2rem] min-h-[580px] flex flex-col relative overflow-hidden shadow-lg">
 
         <header className="p-6 border-b border-zinc-800/80 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
@@ -165,22 +181,22 @@ export default function DebriefView() {
         <footer className="p-4 border-t border-zinc-800 flex flex-col sm:flex-row items-center justify-end gap-4 bg-zinc-950/40">
           <button
             onClick={() => setCurrentTab("overview")}
-            className="w-full sm:w-auto px-6 py-3 font-sans text-xs font-bold text-zinc-400 hover:text-white transition-colors rounded-xl uppercase tracking-wider"
+            className="w-full sm:w-auto px-6 py-3 font-sans text-xs font-bold text-zinc-400 hover:text-white transition-colors rounded-xl uppercase tracking-wider cursor-pointer"
           >
             BACK TO DASHBOARD
           </button>
           <button
             id="export-session-data-btn"
             onClick={handleExportSessionData}
-            className="w-full sm:w-auto px-6 py-3 bg-zinc-800 text-zinc-300 hover:bg-zinc-700 hover:text-white font-sans text-xs font-bold transition-all flex items-center justify-center gap-1.5 rounded-xl uppercase tracking-wider shadow-sm"
+            className="w-full sm:w-auto px-6 py-3 bg-zinc-800 text-zinc-300 hover:bg-zinc-700 hover:text-white font-sans text-xs font-bold transition-all flex items-center justify-center gap-1.5 rounded-xl uppercase tracking-wider shadow-sm cursor-pointer"
           >
-            <span className="material-symbols-outlined text-sm font-bold">download</span>
-            EXPORT SESSION DATA
+            <span className="material-symbols-outlined text-sm font-bold">picture_as_pdf</span>
+            EXPORT PDF
           </button>
           <button
             id="copy-session-data-btn"
             onClick={handleCopySessionData}
-            className={`w-full sm:w-auto px-6 py-3 font-sans text-xs font-bold transition-all flex items-center justify-center gap-1.5 rounded-xl uppercase tracking-wider shadow-sm ${
+            className={`w-full sm:w-auto px-6 py-3 font-sans text-xs font-bold transition-all flex items-center justify-center gap-1.5 rounded-xl uppercase tracking-wider shadow-sm cursor-pointer ${
               isCopied
                 ? 'bg-emerald-900/20 text-emerald-400 border border-emerald-500/20'
                 : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700 hover:text-white'
@@ -193,7 +209,7 @@ export default function DebriefView() {
           </button>
           <button
             onClick={() => setCurrentTab("schedule")}
-            className="w-full sm:w-auto px-8 py-3 bg-indigo-600 text-white font-sans text-xs font-bold hover:bg-indigo-500 transition-all flex items-center justify-center gap-1.5 rounded-xl uppercase tracking-wider shadow-lg"
+            className="w-full sm:w-auto px-8 py-3 bg-indigo-600 text-white font-sans text-xs font-bold hover:bg-indigo-500 transition-all flex items-center justify-center gap-1.5 rounded-xl uppercase tracking-wider shadow-lg cursor-pointer"
           >
             SCHEDULE REMAINING TASKS
             <span className="material-symbols-outlined text-sm font-bold">arrow_forward</span>

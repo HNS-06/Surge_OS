@@ -14,7 +14,7 @@ export default function OnboardingView() {
   } = useApp();
 
   return (
-    <div className="flex-1 technical-grid-dense flex flex-col items-center justify-center relative p-4 sm:p-8 py-12">
+    <div className="absolute inset-0 overflow-y-auto technical-grid-dense flex flex-col items-center justify-center relative p-4 sm:p-8 py-12">
       <div className="w-full max-w-2xl mx-auto bg-zinc-900 border border-zinc-800 p-6 sm:p-10 relative rounded-[2rem] shadow-2xl">
 
         <div className="mb-8">
@@ -47,7 +47,7 @@ export default function OnboardingView() {
               />
               <button
                 onClick={handleAddOnboardingSubject}
-                className="bg-indigo-600 hover:bg-indigo-500 text-white font-sans text-xs font-bold px-6 py-3 rounded-xl transition-all flex items-center justify-center gap-2"
+                className="bg-indigo-600 hover:bg-indigo-500 text-white font-sans text-xs font-bold px-6 py-3 rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer"
               >
                 ADD <span className="material-symbols-outlined text-sm font-bold">add</span>
               </button>
@@ -64,7 +64,7 @@ export default function OnboardingView() {
                     <span className="font-sans text-xs text-zinc-200">{subj}</span>
                     <button
                       onClick={() => handleRemoveSubject(subj)}
-                      className="material-symbols-outlined text-xs text-zinc-500 hover:text-red-400 transition-colors font-bold"
+                      className="material-symbols-outlined text-xs text-zinc-500 hover:text-red-400 transition-colors font-bold cursor-pointer"
                     >
                       close
                     </button>
@@ -103,7 +103,7 @@ export default function OnboardingView() {
         <footer className="mt-12 pt-8 border-t border-zinc-800 flex flex-col sm:flex-row justify-between items-center gap-3">
           <button
             onClick={() => setCurrentTab("overview")}
-            className="flex items-center gap-2 font-sans text-xs font-bold text-zinc-400 hover:text-white transition-colors py-2 group tracking-wider"
+            className="flex items-center gap-2 font-sans text-xs font-bold text-zinc-400 hover:text-white transition-colors py-2 group tracking-wider cursor-pointer"
           >
             <span className="material-symbols-outlined group-hover:-translate-x-1 transition-transform">arrow_back</span>
             BACK
@@ -111,7 +111,7 @@ export default function OnboardingView() {
           <button
             onClick={handleFinishOnboarding}
             disabled={subjects.length === 0}
-            className="flex items-center gap-2 font-sans text-xs font-bold bg-indigo-600 text-white px-8 py-3 rounded-xl hover:bg-indigo-500 transition-all group disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-2 font-sans text-xs font-bold bg-indigo-600 text-white px-8 py-3 rounded-xl hover:bg-indigo-500 transition-all group disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
           >
             NEXT
             <span className="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span>

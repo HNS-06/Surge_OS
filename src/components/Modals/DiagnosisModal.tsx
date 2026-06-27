@@ -21,7 +21,7 @@ export default function DiagnosisModal() {
       <button
         key={id}
         onClick={() => handleSelectTriggerOption(id, title, desc)}
-        className={`group text-left p-6 border transition-all duration-150 flex flex-col gap-4 rounded-2xl hover:border-indigo-500/50 hover:bg-zinc-950/40 ${
+        className={`group text-left p-6 border transition-all duration-150 flex flex-col gap-4 rounded-2xl hover:border-indigo-500/50 hover:bg-zinc-950/40 cursor-pointer ${
           isActive ? 'border-amber-500 bg-amber-500/5 shadow-lg' : 'border-zinc-800 bg-zinc-900/40'
         }`}
       >
@@ -61,7 +61,7 @@ export default function DiagnosisModal() {
           </div>
           <button 
             onClick={() => setIsDiagnosisModalOpen(false)}
-            className="text-zinc-500 hover:text-white transition-colors"
+            className="text-zinc-500 hover:text-white transition-colors cursor-pointer"
           >
             <span className="material-symbols-outlined text-3xl">close</span>
           </button>
@@ -159,14 +159,14 @@ export default function DiagnosisModal() {
           <div className="flex gap-3 w-full md:w-auto">
             <button 
               onClick={() => setIsDiagnosisModalOpen(false)}
-              className="flex-grow md:flex-initial px-6 py-3.5 border border-zinc-800 text-zinc-400 hover:text-white font-sans text-xs font-bold tracking-wider uppercase rounded-xl"
+              className="flex-grow md:flex-initial px-6 py-3.5 border border-zinc-800 text-zinc-400 hover:text-white font-sans text-xs font-bold tracking-wider uppercase rounded-xl cursor-pointer"
             >
               CANCEL
             </button>
             {diagnosisStep === 3 && (
               <button 
                 onClick={handleGenerateSurvivalPlan}
-                className="flex-grow md:flex-initial px-8 py-3.5 bg-amber-500 text-zinc-950 font-sans text-xs font-bold tracking-wider uppercase hover:brightness-110 active:scale-95 transition-all rounded-xl"
+                className="flex-grow md:flex-initial px-8 py-3.5 bg-amber-500 text-zinc-950 font-sans text-xs font-bold tracking-wider uppercase hover:brightness-110 active:scale-95 transition-all rounded-xl cursor-pointer"
               >
                 GENERATE SURVIVAL PLAN
               </button>
